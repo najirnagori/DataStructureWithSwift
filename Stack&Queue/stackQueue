@@ -1,0 +1,107 @@
+// MARK: Stack Implementation
+struct Stack<Element> {
+    private var storage: [Element] = []
+    
+    init() {}
+    
+    init(_ element: [Element]) {
+        self.storage = element
+    }
+    
+    func isEmpty() -> Bool {
+        return peek() == nil
+    }
+    
+    // MARK: give top element of the stack
+    func peek() -> Element? {
+        return storage.last
+    }
+    
+    mutating func push(_ element: Element) {
+        storage.append(element)
+    }
+    
+    // MARK: if you dont want to use pop result then use discardableResult, it will remove warning 
+    @discardableResult
+    mutating func pop() -> Element? {
+        return storage.popLast()
+    }
+}
+
+extension Stack {
+    var description: String {
+        return storage.map {"\($0)"}.joined(separator: " ")
+    }
+}
+
+extension Stack: ExpressibleByArrayLiteral {
+    init(arrayLiteral elements: Element...) {
+        storage = elements
+    }
+}
+
+// Question: Check balanced parentheses
+func checkBalance(str: String) -> Bool {
+    var stack: Stack<Character> = Stack()
+    let strArray = Array(str)
+    for char in strArray {
+        if char == "(" {
+            stack.push(char)
+        } else if char == ")" {
+            stack.pop()
+        }
+    }
+    return stack.isEmpty()
+}
+
+// MARK: Queue Implementation using Array
+protocol Queue {
+    associatedtype Element
+    mutating func enqueue(_ element: Element)
+    mutating func dequeue() -> Element?
+    var isEmpty: Bool { get }
+    var peek: Element? { get }
+}
+
+struct QueueArray<T>: Queue {
+    private var array: [T] = []
+    var isEmpty: Bool {
+        array.isEmpty
+    }
+    var peek: T? {
+        return array.first
+    }
+    mutating func enqueue(_ element: T) {
+        array.append(element)
+    }
+    mutating func dequeue() -> T? {
+        isEmpty ? nil : array.removeFirst()
+    }
+}
+
+// MARK: Queue implementation using stack
+struct QueueStack<T>: Queue {
+    private var enqueueStack: [T] = []
+    private var dequeueStack: [T] = []
+    var isEmpty: Bool {
+        enqueueStack.isEmpty && dequeueStack.isEmpty
+    }
+    var peek: T? {
+        !dequeueStack.isEmpty ? dequeueStack.last : enqueueStack.first 
+    }
+    mutating func enqueue(_ element: T) {
+        enqueueStack.append(element)
+    }
+    mutating func dequeue() -> T? {
+        if dequeueStack.isEmpty {
+            dequeueStack = enqueueStack.reversed()
+            enqueueStack.removeAll()
+        }
+        return dequeueStack.popLast()
+    }
+    
+    func display() {
+        print(enqueueStack)
+        print(dequeueStack)
+    }
+}
